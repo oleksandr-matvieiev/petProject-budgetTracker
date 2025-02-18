@@ -1,5 +1,6 @@
 package com.example.petprojectbudgettracker.models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -12,6 +13,7 @@ public class SubCategory {
     @Column(nullable = false)
     private String name;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;

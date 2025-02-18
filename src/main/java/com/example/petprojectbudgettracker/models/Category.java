@@ -1,5 +1,6 @@
 package com.example.petprojectbudgettracker.models;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -15,7 +16,8 @@ public class Category {
     @Column(nullable = false, unique = true)
     private TransactionCategory transactionCategory;
 
-    @OneToMany(mappedBy = "category",cascade = CascadeType.ALL)
+    @JsonManagedReference
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<SubCategory> subCategories;
 
     public Category() {
