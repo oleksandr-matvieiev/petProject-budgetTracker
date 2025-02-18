@@ -1,6 +1,5 @@
 package com.example.petprojectbudgettracker.dto;
 
-import lombok.Data;
 
 public class AuthRequest {
     private String email;

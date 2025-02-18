@@ -2,13 +2,8 @@ package com.example.petprojectbudgettracker.models;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import lombok.*;
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@ToString
-@EqualsAndHashCode
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
