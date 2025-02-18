@@ -50,7 +50,9 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        initializeCategories();
+        if (categoryRepository.count() == 0) {
+            initializeCategories();
+        }
     }
 
     private void initializeCategories() {
