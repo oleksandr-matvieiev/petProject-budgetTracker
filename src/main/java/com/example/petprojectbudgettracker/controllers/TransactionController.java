@@ -29,6 +29,16 @@ public class TransactionController {
         return ResponseEntity.ok(transactionService.getTransactionsById(id));
     }
 
+    @GetMapping("/find-transactions-by-type")
+    public ResponseEntity<List<Transaction>> findTransactionsByType(@RequestParam String type) {
+        return ResponseEntity.ok(transactionService.getAllTransactionsByCurrentUserAndType(type));
+    }
+
+    @GetMapping("/find-transaction-by-category")
+    public ResponseEntity<List<Transaction>> findTransactionsByCategory(@RequestParam String category) {
+        return ResponseEntity.ok(transactionService.getAllTransactionsByCurrentUserAndCategory(category));
+    }
+
     @PostMapping("/create-new-transaction")
     public ResponseEntity<Transaction> createTransaction(@RequestParam double amount,
                                                          @RequestParam TransactionType type,

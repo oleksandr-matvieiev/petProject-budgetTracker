@@ -31,6 +31,16 @@ public class TransactionService {
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
     }
 
+    public List<Transaction> getAllTransactionsByCurrentUserAndType(String type) {
+        User user = authService.getCurrentUser();
+        return transactionRepository.findByUserIdAndType(user.getId(), TransactionType.valueOf(type));
+    }
+
+    public List<Transaction> getAllTransactionsByCurrentUserAndCategory(String categoryType) {
+        User user = authService.getCurrentUser();
+        return transactionRepository.findByUserIdAndCategory(user.getId(),TransactionCategory.valueOf(categoryType));
+    }
+
     @Transactional
     public Transaction saveTransaction(double amount, TransactionType type,
                                        TransactionCategory category, Long subCategoryId,
