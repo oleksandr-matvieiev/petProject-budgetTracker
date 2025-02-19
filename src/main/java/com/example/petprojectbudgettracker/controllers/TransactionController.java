@@ -19,17 +19,17 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-    @GetMapping("get-all-transactions")
+    @GetMapping("/get-all-transactions")
     public ResponseEntity<List<Transaction>> getAllTransactions() {
-        return ResponseEntity.ok(transactionService.getAllTransactions());
+        return ResponseEntity.ok(transactionService.getAllTransactionsForCurrentUser());
     }
 
-    @GetMapping("get-transaction-by-id")
+    @GetMapping("/get-transaction-by-id")
     public ResponseEntity<Transaction> getTransactionById(@RequestParam Long id) {
         return ResponseEntity.ok(transactionService.getTransactionsById(id));
     }
 
-    @PostMapping("create-new-transaction")
+    @PostMapping("/create-new-transaction")
     public ResponseEntity<Transaction> createTransaction(@RequestParam double amount,
                                                          @RequestParam TransactionType type,
                                                          @RequestParam TransactionCategory category,
@@ -39,7 +39,7 @@ public class TransactionController {
                 , category, subCategoryId, description), HttpStatus.CREATED);
     }
 
-    @PostMapping("update-transaction")
+    @PostMapping("/update-transaction")
     public ResponseEntity<Transaction> updateTransaction(@RequestParam Long id,
                                                          @RequestParam(required = false) Double amount,
                                                          @RequestParam(required = false) TransactionType type,
@@ -50,7 +50,7 @@ public class TransactionController {
                 , category, subCategoryId, description), HttpStatus.CREATED);
     }
 
-    @DeleteMapping("delete-transaction")
+    @DeleteMapping("/delete-transaction")
     public ResponseEntity<Transaction> deleteTransaction(@RequestParam Long id) {
         transactionService.deleteTransaction(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
