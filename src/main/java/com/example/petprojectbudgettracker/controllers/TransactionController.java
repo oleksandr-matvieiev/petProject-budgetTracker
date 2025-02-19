@@ -1,0 +1,59 @@
+package com.example.petprojectbudgettracker.controllers;
+
+import com.example.petprojectbudgettracker.models.Transaction;
+import com.example.petprojectbudgettracker.models.TransactionCategory;
+import com.example.petprojectbudgettracker.models.TransactionType;
+import com.example.petprojectbudgettracker.services.TransactionService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/transaction")
+public class TransactionController {
+    private final TransactionService transactionService;
+
+    public TransactionController(TransactionService transactionService) {
+        this.transactionService = transactionService;
+    }
+
+    @GetMapping("get-all-transactions")
+    public ResponseEntity<List<Transaction>> getAllTransactions() {
+        return ResponseEntity.ok(transactionService.getAllTransactions());
+    }
+
+    @GetMapping("get-transaction-by-id")
+    public ResponseEntity<Transaction> getTransactionById(@RequestParam Long id) {
+        return ResponseEntity.ok(transactionService.getTransactionsById(id));
+    }
+
+    @PostMapping("create-new-transaction")
+    public ResponseEntity<Transaction> createTransaction(@RequestParam double amount,
+                                                         @RequestParam TransactionType type,
+                                                         @RequestParam TransactionCategory category,
+                                                         @RequestParam Long subCategoryId,
+                                                         @RequestParam(required = false) String description) {
+        return new ResponseEntity<>(transactionService.saveTransaction(amount, type
+                , category, subCategoryId, description), HttpStatus.CREATED);
+    }
+
+    @PostMapping("update-transaction")
+    public ResponseEntity<Transaction> updateTransaction(@RequestParam Long id,
+                                                         @RequestParam(required = false) Double amount,
+                                                         @RequestParam(required = false) TransactionType type,
+                                                         @RequestParam(required = false) TransactionCategory category,
+                                                         @RequestParam(required = false) Long subCategoryId,
+                                                         @RequestParam(required = false) String description) {
+        return new ResponseEntity<>(transactionService.updateTransaction(id, amount, type
+                , category, subCategoryId, description), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("delete-transaction")
+    public ResponseEntity<Transaction> deleteTransaction(@RequestParam Long id) {
+        transactionService.deleteTransaction(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+}
