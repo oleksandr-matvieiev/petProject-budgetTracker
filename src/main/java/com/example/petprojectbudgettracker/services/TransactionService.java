@@ -21,8 +21,9 @@ public class TransactionService {
         this.subCategoryRepository = subCategoryRepository;
     }
 
-    public List<Transaction> getAllTransactions() {
-        return transactionRepository.findAll();
+    public List<Transaction> getAllTransactionsForCurrentUser() {
+        User user = authService.getCurrentUser();
+        return transactionRepository.findByUserId(user.getId());
     }
 
     public Transaction getTransactionsById(Long id) {
@@ -59,6 +60,9 @@ public class TransactionService {
 
         Transaction transaction = getTransactionsById(id);
 
+        if (transaction.getUser() != user) {
+            throw new RuntimeException("Transaction not found");
+        }
 
         if (amount != null) transaction.setAmount(amount);
         if (type != null) transaction.setType(type);
@@ -68,13 +72,18 @@ public class TransactionService {
                     .orElseThrow(() -> new RuntimeException("SubCategory not found"));
             transaction.setSubCategory(subCategory);
         }
-        if (description!=null) transaction.setDescription(description);
+        if (description != null) transaction.setDescription(description);
 
         return transactionRepository.save(transaction);
     }
 
     @Transactional
     public void deleteTransaction(Long id) {
+        User user = authService.getCurrentUser();
+        Transaction transaction = getTransactionsById(id);
+        if (transaction.getUser() != user) {
+            throw new RuntimeException("Transaction not found");
+        }
         transactionRepository.deleteById(id);
     }
 
