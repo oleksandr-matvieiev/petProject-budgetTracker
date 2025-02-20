@@ -48,6 +48,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/category/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/transaction/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/user/get-balance").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/api/user/get-all-users").hasRole("ADMIN")
                         .anyRequest().permitAll()
 
                 )
