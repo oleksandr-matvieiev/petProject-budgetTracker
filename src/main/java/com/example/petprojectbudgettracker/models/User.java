@@ -8,6 +8,10 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column
+    private Double budget=0.0;
+
     @Email
     @Column(unique = true, nullable = false)
     private String email;
@@ -24,6 +28,14 @@ public class User {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public double getBudget() {
+        return budget;
+    }
+
+    public void setBudget(double budget) {
+        this.budget = budget;
     }
 
     public String getEmail() {

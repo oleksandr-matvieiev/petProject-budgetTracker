@@ -38,7 +38,7 @@ public class TransactionService {
 
     public List<Transaction> getAllTransactionsByCurrentUserAndCategory(String categoryType) {
         User user = authService.getCurrentUser();
-        return transactionRepository.findByUserIdAndCategory(user.getId(),TransactionCategory.valueOf(categoryType));
+        return transactionRepository.findByUserIdAndCategory(user.getId(), TransactionCategory.valueOf(categoryType));
     }
 
     @Transactional
@@ -58,6 +58,12 @@ public class TransactionService {
         transaction.setSubCategory(subCategory);
         transaction.setTransactionDate(LocalDate.now());
         transaction.setDescription(description);
+
+        if (type == TransactionType.INCOME) {
+            user.setBudget(user.getBudget() + amount);
+        } else if (type == TransactionType.EXPENSE) {
+            user.setBudget(user.getBudget() - amount);
+        }
 
         return transactionRepository.save(transaction);
     }
