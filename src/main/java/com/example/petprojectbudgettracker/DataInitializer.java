@@ -1,12 +1,12 @@
 package com.example.petprojectbudgettracker;
 
-import com.example.petprojectbudgettracker.models.Category;
-import com.example.petprojectbudgettracker.models.SubCategory;
-import com.example.petprojectbudgettracker.models.TransactionCategory;
+import com.example.petprojectbudgettracker.models.*;
 import com.example.petprojectbudgettracker.repositories.CategoryRepository;
 import com.example.petprojectbudgettracker.repositories.SubCategoryRepository;
+import com.example.petprojectbudgettracker.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -16,6 +16,8 @@ import java.util.Map;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     private final CategoryRepository categoryRepository;
     private final SubCategoryRepository subCategoryRepository;
 
@@ -42,7 +44,9 @@ public class DataInitializer implements CommandLineRunner {
         SUBCATEGORIES_MAP.put(TransactionCategory.OTHER, Arrays.asList("Charity / donations", " Holidays and birthdays", "Unexpected expenses"));
     }
 
-    public DataInitializer(CategoryRepository categoryRepository, SubCategoryRepository subCategoryRepository) {
+    public DataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder, CategoryRepository categoryRepository, SubCategoryRepository subCategoryRepository) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
         this.categoryRepository = categoryRepository;
         this.subCategoryRepository = subCategoryRepository;
     }
@@ -52,8 +56,20 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if (categoryRepository.count() == 0) {
             initializeCategories();
+            createAdminUser();
         }
     }
+
+    private void createAdminUser() {
+        if (userRepository.findByEmail("admin@gmail.com").isEmpty()) {
+            User user = new User();
+            user.setEmail("admin@gmail.com");
+            user.setPassword(passwordEncoder.encode("password"));
+            user.setRole(Role.ADMIN);
+            userRepository.save(user);
+        }
+    }
+
 
     private void initializeCategories() {
         for (TransactionCategory categoryEnum : TransactionCategory.values()) {
@@ -70,7 +86,6 @@ public class DataInitializer implements CommandLineRunner {
                     subCategoryRepository.save(subCategoryObj);
                 }
             }
-
         }
     }
 
