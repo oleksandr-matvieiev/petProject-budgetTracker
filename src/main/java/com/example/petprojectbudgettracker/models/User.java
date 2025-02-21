@@ -10,7 +10,7 @@ public class User {
     private Long id;
 
     @Column
-    private Double budget=0.0;
+    private Double budget;
 
     @Email
     @Column(unique = true, nullable = false)
@@ -22,6 +22,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     Role role;
 
+    public User() {
+        budget = 0.0;
+    }
+
     public Long getId() {
         return id;
     }
@@ -30,11 +34,11 @@ public class User {
         this.id = id;
     }
 
-    public double getBudget() {
+    public Double getBudget() {
         return budget;
     }
 
-    public void setBudget(double budget) {
+    public void setBudget(Double budget) {
         this.budget = budget;
     }
 
