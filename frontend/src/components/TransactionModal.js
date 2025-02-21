@@ -1,5 +1,5 @@
 // src/components/TransactionModal.jsx
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import axios from "axios";
 import styled from "styled-components";
 
@@ -44,15 +44,23 @@ const CloseButton = styled.button`
 `;
 
 const TransactionModal = ({ onClose }) => {
+    const [categories, setCategories] = useState([]);
+    const [subCategories, setSubCategories] = useState([]);
     const [form, setForm] = useState({
         amount: "",
-        type: "INCOME",
-        category: "SALARY",
+        type: "",
+        category: "",
+        subCategoryId: "",
         description: "",
     });
 
     const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setForm({ ...form, [name]: value });
+
+        if (name === "category") {
+            fetchSubCategories(value);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -70,6 +78,35 @@ const TransactionModal = ({ onClose }) => {
         }
     };
 
+    const fetchCategories = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await axios.get("http://localhost:8080/api/category/get-all-category",{
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setCategories(res.data);
+        } catch (error) {
+            console.error("Error while getting categories", error);
+        }
+    };
+
+    const fetchSubCategories = async (category) => {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await axios.get("http://localhost:8080/api/category/get-all-subCategory-by-category", {
+                params: { category },
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setSubCategories(res.data);
+            setForm((prev) => ({ ...prev, subCategoryId: res.data.length > 0 ? res.data[0].id : "" }));
+        } catch (error) {
+            console.error("Error while getting sub categories", error);
+        }
+    };
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
     return (
         <ModalOverlay>
             <ModalContent>
@@ -80,17 +117,25 @@ const TransactionModal = ({ onClose }) => {
                         <option value="INCOME">Income</option>
                         <option value="EXPENSE">Expense</option>
                     </Select>
-                    <Select name="category" onChange={handleChange}>
-                        <option value="HOUSING">Housing</option>
-                        <option value="FOOD">Food</option>
-                        <option value="HEALTH">Health</option>
-                        <option value="ENTERTAINMENT">Entertainment</option>
-                        <option value="SHOPPING">Shopping</option>
-                        <option value="EDUCATION">Education</option>
-                        <option value="PETS">Pets</option>
-                        <option value="FINANCE">Finance</option>
-                        <option value="OTHER">Other</option>
+                    <Select name="category" onChange={handleChange} required>
+                        <option value="">Choose category</option>
+                        {categories.map((cat) => (
+                            <option key={cat.id} value={cat.transactionCategory}>
+                                {cat.transactionCategory}
+                            </option>
+                        ))}
                     </Select>
+                    {subCategories.length > 0 && (
+                        <Select name="subCategoryId" onChange={handleChange} required>
+                            {subCategories.map((subCat) => (
+                                <option key={subCat.id} value={subCat.id}>
+                                    {subCat.name}
+                                </option>
+                            ))}
+                        </Select>
+                    )}
+
+
                     <Input type="text" name="description" placeholder="Description (optional)" onChange={handleChange} />
                     <button type="submit">Add</button>
                     <CloseButton onClick={onClose}>Close</CloseButton>
