@@ -1,20 +1,22 @@
+// src/pages/TransactionDetailPage.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import styled from "styled-components";
+import UpdateTransactionModal from "../components/UpdateTransactionModal";
 
 const Container = styled.div`
-  padding: 20px;
-  max-width: 500px;
-  margin: 0 auto;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-width: 500px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 `;
 
 const Button = styled.button`
-  margin-top: 10px;
-  margin-right: 10px;
+    margin-top: 10px;
+    margin-right: 10px;
 `;
 
 const TransactionDetailPage = () => {
@@ -22,6 +24,7 @@ const TransactionDetailPage = () => {
     const navigate = useNavigate();
     const [transaction, setTransaction] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showUpdateModal, setShowUpdateModal] = useState(false);
 
     useEffect(() => {
         fetchTransaction();
@@ -70,7 +73,15 @@ const TransactionDetailPage = () => {
                     <p><strong>Description:</strong> {transaction.description || "No description"}</p>
 
                     <Button onClick={handleDelete} style={{ background: "red" }}>Delete</Button>
-                    <Button onClick={() => alert("Update function will be implemented")}>Update</Button>
+                    <Button onClick={() => setShowUpdateModal(true)}>Update</Button>
+
+                    {showUpdateModal && (
+                        <UpdateTransactionModal
+                            transaction={transaction}
+                            onClose={() => setShowUpdateModal(false)}
+                            onUpdate={fetchTransaction}
+                        />
+                    )}
                 </>
             ) : (
                 <p>Transaction not found</p>
