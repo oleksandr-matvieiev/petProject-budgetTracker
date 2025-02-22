@@ -80,7 +80,11 @@ public class TransactionService {
             throw new RuntimeException("Transaction not found");
         }
 
-        if (amount != null) transaction.setAmount(amount);
+        if (amount != null) {
+            double difference = amount - transaction.getAmount();
+                transaction.setAmount(transaction.getAmount() + difference);
+                user.setBudget(user.getBudget() + difference);
+        }
         if (type != null) transaction.setType(type);
         if (category != null) transaction.setCategory(category);
         if (subCategoryId != null) {
@@ -100,6 +104,7 @@ public class TransactionService {
         if (transaction.getUser() != user) {
             throw new RuntimeException("Transaction not found");
         }
+        user.setBudget(user.getBudget() + transaction.getAmount());
         transactionRepository.deleteById(id);
     }
 
