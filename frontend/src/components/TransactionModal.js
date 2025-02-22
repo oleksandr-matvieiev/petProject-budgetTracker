@@ -112,7 +112,7 @@ const TransactionModal = ({ onClose }) => {
             <ModalContent>
                 <h3>New transaction</h3>
                 <form onSubmit={handleSubmit}>
-                    <Input type="number" name="amount" placeholder="Amount" onChange={handleChange} required />
+                    <Input type={"double"} name="amount" placeholder="Amount" onChange={handleChange} required />
                     <Select name="type" onChange={handleChange}>
                         <option value="INCOME">Income</option>
                         <option value="EXPENSE">Expense</option>
