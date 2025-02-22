@@ -2,52 +2,53 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 import TransactionModal from "../components/TransactionModal";
 
 const Container = styled.div`
-  padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
 `;
 
 const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 `;
 
 const Balance = styled.div`
-  font-size: 20px;
-  font-weight: bold;
-  color: #007bff;
+    font-size: 20px;
+    font-weight: bold;
+    color: #007bff;
 `;
 
 const TransactionsTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
 `;
 
 const TableHeader = styled.th`
-  background-color: #007bff;
-  color: white;
-  padding: 10px;
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
 `;
 
 const TableRow = styled.tr`
-  &:nth-child(even) {
-    background-color: #f2f2f2;
-  }
+    &:nth-child(even) {
+        background-color: #f2f2f2;
+    }
 `;
 
 const TableCell = styled.td`
-  padding: 10px;
-  border: 1px solid #ddd;
+    padding: 10px;
+    border: 1px solid #ddd;
 `;
 
 const AddButton = styled.button`
-  margin-top: 20px;
+    margin-top: 20px;
 `;
 
 const HomePage = () => {
@@ -68,7 +69,7 @@ const HomePage = () => {
             });
             setBalance(res.data);
         } catch (error) {
-            console.error("Помилка отримання балансу", error);
+            console.error("Error fetching balance", error);
         }
     };
 
@@ -80,25 +81,26 @@ const HomePage = () => {
             });
             setTransactions(res.data);
         } catch (error) {
-            console.error("Помилка отримання транзакцій", error);
+            console.error("Error fetching transactions", error);
         }
     };
 
     return (
         <Container>
             <Header>
-                <a href="/settings">⚙ Налаштування</a>
-                <Balance>Баланс: ${balance.toFixed(2)}</Balance>
+                <a href="/settings">⚙ Settings (in develop)</a>
+                <Balance>Balance: ${balance.toFixed(2)}</Balance>
             </Header>
 
-            <h2>Останні транзакції</h2>
+            <h2>Last transactions</h2>
             <TransactionsTable>
                 <thead>
                 <tr>
-                    <TableHeader>Сума</TableHeader>
-                    <TableHeader>Тип</TableHeader>
-                    <TableHeader>Категорія</TableHeader>
-                    <TableHeader>Дата</TableHeader>
+                    <TableHeader>Amount</TableHeader>
+                    <TableHeader>Type</TableHeader>
+                    <TableHeader>Category</TableHeader>
+                    <TableHeader>Date</TableHeader>
+                    <TableHeader>Details</TableHeader>
                 </tr>
                 </thead>
                 <tbody>
@@ -108,12 +110,15 @@ const HomePage = () => {
                         <TableCell>{tx.type}</TableCell>
                         <TableCell>{tx.category}</TableCell>
                         <TableCell>{tx.transactionDate}</TableCell>
+                        <TableCell>
+                            <Link to={`/transaction/${tx.id}`}>🔍 View</Link>
+                        </TableCell>
                     </TableRow>
                 ))}
                 </tbody>
             </TransactionsTable>
 
-            <AddButton onClick={() => setShowModal(true)}>+ Додати транзакцію</AddButton>
+            <AddButton onClick={() => setShowModal(true)}>+ Add new Transaction</AddButton>
 
             {showModal && <TransactionModal onClose={() => setShowModal(false)} />}
         </Container>
