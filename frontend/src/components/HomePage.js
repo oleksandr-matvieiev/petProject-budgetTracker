@@ -23,6 +23,18 @@ const Balance = styled.div`
     color: #007bff;
 `;
 
+const FilterContainer = styled.div`
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+`;
+
+const Select = styled.select`
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+`;
+
 const TransactionsTable = styled.table`
     width: 100%;
     border-collapse: collapse;
@@ -54,6 +66,8 @@ const HomePage = () => {
     const [balance, setBalance] = useState(0);
     const [transactions, setTransactions] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [filterType, setFilterType] = useState("");
+    const [filterCategory, setFilterCategory] = useState("");
 
     useEffect(() => {
         fetchBalance();
@@ -84,6 +98,50 @@ const HomePage = () => {
         }
     };
 
+    const fetchTransactionsByType = async (type) => {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await axios.get(`http://localhost:8080/api/transaction/find-transactions-by-type`, {
+                params: { type },
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setTransactions(res.data);
+        } catch (error) {
+            console.error("Error fetching transactions by type", error);
+        }
+    };
+
+    const fetchTransactionsByCategory = async (category) => {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await axios.get(`http://localhost:8080/api/transaction/find-transaction-by-category`, {
+                params: { category },
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setTransactions(res.data);
+        } catch (error) {
+            console.error("Error fetching transactions by category", error);
+        }
+    };
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+
+        if (name === "type") {
+            setFilterType(value);
+            value ? fetchTransactionsByType(value) : fetchTransactions();
+        } else if (name === "category") {
+            setFilterCategory(value);
+            value ? fetchTransactionsByCategory(value) : fetchTransactions();
+        }
+    };
+
+    const clearFilters = () => {
+        setFilterType("");
+        setFilterCategory("");
+        fetchTransactions();
+    };
+
     return (
         <Container>
             <Header>
@@ -92,6 +150,31 @@ const HomePage = () => {
             </Header>
 
             <h2>Last transactions</h2>
+
+            {/* Фільтри */}
+            <FilterContainer>
+                <Select name="type" value={filterType} onChange={handleFilterChange}>
+                    <option value="">Filter by Type</option>
+                    <option value="INCOME">Income</option>
+                    <option value="EXPENSE">Expense</option>
+                </Select>
+
+                <Select name="category" value={filterCategory} onChange={handleFilterChange}>
+                    <option value="">Filter by Category</option>
+                    <option value="FOOD">Food</option>
+                    <option value="TRANSPORT">Transport</option>
+                    <option value="HEALTH">Health</option>
+                    <option value="ENTERTAINMENT">Entertainment</option>
+                    <option value="SHOPPING">Shopping</option>
+                    <option value="EDUCATION">Education</option>
+                    <option value="PETS">Pets</option>
+                    <option value="FINANCE">Finance</option>
+                    <option value="OTHER">Other</option>
+                </Select>
+
+                <button onClick={clearFilters}>Clear Filters</button>
+            </FilterContainer>
+
             <TransactionsTable>
                 <thead>
                 <tr>
