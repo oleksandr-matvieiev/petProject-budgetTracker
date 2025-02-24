@@ -25,6 +25,7 @@ public class DataInitializer implements CommandLineRunner {
 
 
     static {
+        SUBCATEGORIES_MAP.put(TransactionCategory.SALARY, List.of("Salary"));
         SUBCATEGORIES_MAP.put(TransactionCategory.HOUSING, Arrays.asList("Rent / Mortgage", "Electricity", "Water and sewerage",
                 "Gas / Heating", "Internet", "Mobile communication", "House / apartment renovation"));
         SUBCATEGORIES_MAP.put(TransactionCategory.FOOD, Arrays.asList("Food products", "Cafes and restaurants", "Coffee / tea / snacks",

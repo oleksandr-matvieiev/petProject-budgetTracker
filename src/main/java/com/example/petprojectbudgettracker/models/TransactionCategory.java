@@ -2,6 +2,7 @@ package com.example.petprojectbudgettracker.models;
 
 
 public enum TransactionCategory {
+    SALARY("Salary"),
     HOUSING("Housing & utilities"),
     FOOD("Food"),
     TRANSPORT("Transportation"),
