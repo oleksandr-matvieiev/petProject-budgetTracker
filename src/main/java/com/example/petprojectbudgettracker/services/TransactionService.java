@@ -3,11 +3,15 @@ package com.example.petprojectbudgettracker.services;
 import com.example.petprojectbudgettracker.models.*;
 import com.example.petprojectbudgettracker.repositories.SubCategoryRepository;
 import com.example.petprojectbudgettracker.repositories.TransactionRepository;
+import com.example.petprojectbudgettracker.utils.SimpleImageProcessor;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TransactionService {
@@ -42,27 +46,50 @@ public class TransactionService {
     }
 
     @Transactional
-    public Transaction saveTransaction(double amount, TransactionType type,
+    public Transaction saveTransaction(Double amount, TransactionType type,
                                        TransactionCategory category, Long subCategoryId,
-                                       String description) {
+                                       String description, MultipartFile file) throws IOException {
         User user = authService.getCurrentUser();
+
+        Double finalAmount = amount;
 
         SubCategory subCategory = subCategoryRepository.findById(subCategoryId)
                 .orElseThrow(() -> new RuntimeException("SubCategory not found"));
 
         Transaction transaction = new Transaction();
         transaction.setUser(user);
-        transaction.setAmount(amount);
         transaction.setType(type);
         transaction.setCategory(category);
         transaction.setSubCategory(subCategory);
         transaction.setTransactionDate(LocalDate.now());
         transaction.setDescription(description);
 
+        if (file != null) {
+            String imagePath = SimpleImageProcessor.saveImage(file);
+            transaction.setImageUrl(imagePath);
+            System.out.println("Saved image at: " + imagePath);
+
+            String extractedAmount = SimpleImageProcessor.getTotalAmountFromImage(imagePath);
+            if (extractedAmount != null) {
+                try {
+                    finalAmount = Double.parseDouble(extractedAmount);
+                    transaction.setAmount(finalAmount);
+                } catch (NumberFormatException e) {
+                    System.err.println("Failed to parse extracted amount: " + extractedAmount);
+                    transaction.setAmount(finalAmount != null ? finalAmount : 0.0);
+                }
+            } else {
+                transaction.setAmount(finalAmount != null ? finalAmount : 0.0);
+            }
+        } else {
+            transaction.setAmount(finalAmount != null ? finalAmount : 0.0);
+        }
+
+
         if (type == TransactionType.INCOME) {
-            user.setBudget(user.getBudget() + amount);
+            user.setBudget(user.getBudget() + finalAmount);
         } else if (type == TransactionType.EXPENSE) {
-            user.setBudget(user.getBudget() - amount);
+            user.setBudget(user.getBudget() - finalAmount);
         }
 
         return transactionRepository.save(transaction);
@@ -82,8 +109,8 @@ public class TransactionService {
 
         if (amount != null) {
             double difference = amount - transaction.getAmount();
-                transaction.setAmount(transaction.getAmount() + difference);
-                user.setBudget(user.getBudget() + difference);
+            transaction.setAmount(transaction.getAmount() + difference);
+            user.setBudget(user.getBudget() + difference);
         }
         if (type != null) transaction.setType(type);
         if (category != null) transaction.setCategory(category);
