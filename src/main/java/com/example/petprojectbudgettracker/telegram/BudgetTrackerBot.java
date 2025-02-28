@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,12 +79,52 @@ public class BudgetTrackerBot extends TelegramLongPollingBot {
         String url = "http://localhost:8080/api/transaction/get-all-transactions";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(token); // Додаємо токен у заголовок
+        headers.setBearerAuth(token);
 
         HttpEntity<String> request = new HttpEntity<>(headers);
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
 
-        return response.getBody();
+        try {
+            ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    request,
+                    new ParameterizedTypeReference<List<Map<String, Object>>>() {}
+            );
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                List<Map<String, Object>> transactions = response.getBody();
+
+                if (transactions.isEmpty()) {
+                    return "ℹ️ You have no transactions!.";
+                }
+
+                StringBuilder result = new StringBuilder("📋 *Your transactions:*\n\n");
+                for (Map<String, Object> transaction : transactions) {
+                    result.append(formatTransaction(transaction)).append("\n\n");
+                }
+                return result.toString();
+            } else {
+                return "❌ Error. Status code: " + response.getStatusCode();
+            }
+        } catch (Exception e) {
+            return "❌ Error: " + e.getMessage();
+        }
+    }
+    private String formatTransaction(Map<String, Object> transaction) {
+        Long id = ((Number) transaction.get("id")).longValue();
+        Double amount = ((Number) transaction.get("amount")).doubleValue();
+        String type = (String) transaction.get("type");
+        String category = (String) transaction.get("category");
+        String description = (String) transaction.get("description");
+        String date = (String) transaction.get("transactionDate");
+
+        Map<String, Object> subCategory = (Map<String, Object>) transaction.get("subCategory");
+        String subCategoryName = (subCategory != null) ? (String) subCategory.get("name") : "No";
+
+        return String.format(
+                "🆔 **ID:** %d\n💰 **Amount:** %.2f\n📂 **Type:** %s\n📌 **Category:** %s\n🔖 **Sub-category:** %s\n📝 **Desctiption:** %s\n📅 **Date:** %s",
+                id, amount, type, category, subCategoryName, description, date
+        );
     }
 
     private String fetchTransactionById(String id, String token) {
