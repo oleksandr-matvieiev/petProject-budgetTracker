@@ -32,7 +32,7 @@ const LoginForm = () => {
         e.preventDefault();
         try {
             const res = await axios.post("http://localhost:8080/api/auth/login", user);
-            localStorage.setItem("token", res.data);
+            localStorage.setItem("token", res.data.token);
             alert("Log in successfully");
             navigate("/");
         } catch (error) {
