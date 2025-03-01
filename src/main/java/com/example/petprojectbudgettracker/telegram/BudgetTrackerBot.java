@@ -71,6 +71,12 @@ public class BudgetTrackerBot extends TelegramLongPollingBot {
                     return "❌ Login failed! Check your credentials.";
                 }
             }
+        }else if (command.startsWith("/add_transaction ")) {
+            String[] parts = command.split(" ", 6);
+            if (parts.length < 6) {
+                return "⚠️ Usage: /add_transaction <amount> <type> <category> <subCategoryId> <description>";
+            }
+            return createTransaction(chatId, parts[1], parts[2], parts[3], parts[4], parts[5]);
         }
         return "❌ Invalid command!";
     }
@@ -125,6 +131,40 @@ public class BudgetTrackerBot extends TelegramLongPollingBot {
                 "🆔 **ID:** %d\n💰 **Amount:** %.2f\n📂 **Type:** %s\n📌 **Category:** %s\n🔖 **Sub-category:** %s\n📝 **Desctiption:** %s\n📅 **Date:** %s",
                 id, amount, type, category, subCategoryName, description, date
         );
+    }
+    private String createTransaction(Long chatId, String amount, String type, String category, String subCategoryId, String description) {
+        String token = userTokens.get(chatId);
+        if (token == null) {
+            return "❌ You need to login first! Use /login <email> <password>";
+        }
+
+        String url = "http://localhost:8080/api/transaction/create-new-transaction";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(token);
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("amount", Double.parseDouble(amount));
+        requestBody.put("type", type);
+        requestBody.put("category", category);
+        requestBody.put("subCategoryId", subCategoryId.isEmpty() ? null : Long.parseLong(subCategoryId));
+        requestBody.put("description", description);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, HttpMethod.POST, request, String.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                return "✅ Transaction added successfully!";
+            } else {
+                return "❌ Error: " + response.getStatusCode();
+            }
+        } catch (Exception e) {
+            return "❌ Failed to add transaction: " + e.getMessage();
+        }
     }
 
     private String fetchTransactionById(String id, String token) {
